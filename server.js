@@ -1,29 +1,39 @@
 const express = require('express');
 const app = express();
 
-
 const tarefas = [
     {
         id: 1,
         titulo: 'Lavar o carro',
-        status: 'Concluída'
+        concluida: true
     },
     {
         id: 2,
         titulo: 'Fazer bolo',
-        status: 'Pendente',
+        concluida: false
     },
     {
         id: 3,
         titulo: 'Varrer a calçada',
-        status: 'Concluída'
+        concluida: true
     }
 ];
 
 app.get ('/', (req, res) => {
-    res.send('API de Tarefas no Ar')
+    res.send('API de Tarefas no Ar');
 });
 
 app.get ('/tarefas', (req, res) => {
-    res.json(tarefas)
+    res.json(tarefas);
 });
+
+app.get ('/tarefas/:id', (req, res) => {
+    const { id } = req.params;
+    const buscaId = tarefas.find( p => p.id == Number(id))
+
+    if (!buscaId) {
+        return res.status(404).json({error: "Tarefa não encontrada."});
+    }
+
+    res.json(buscaId)
+})
