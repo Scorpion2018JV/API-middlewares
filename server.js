@@ -20,20 +20,34 @@ const tarefas = [
 ];
 
 app.get ('/', (req, res) => {
-    res.send('API de Tarefas no Ar');
+    res.status(200).send('API de Tarefas no Ar');
 });
 
 app.get ('/tarefas', (req, res) => {
-    res.json(tarefas);
+    const { concluida } = req.query;
+
+    if (concluida === undefined) {
+        return res.status(200).json(tarefas);
+    }
+
+    const buscaConcluida = tarefas.filter( p => p.concluida === (concluida === 'true') );
+    
+    if (!buscaConcluida) {
+        return res.status(404).json({error: "Tarefas não encontradas"})
+    }
+
+    res.status(200).json(buscaConcluida)
 });
 
 app.get ('/tarefas/:id', (req, res) => {
     const { id } = req.params;
-    const buscaId = tarefas.find( p => p.id == Number(id))
+    const buscaId = tarefas.find( p => p.id === Number(id));
 
     if (!buscaId) {
         return res.status(404).json({error: "Tarefa não encontrada."});
     }
 
-    res.json(buscaId)
-})
+    res.status(200).json(buscaId);
+});
+
+app.listen(3000);
