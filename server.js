@@ -20,13 +20,11 @@ const tarefas = [
     }
 ];
 
-// GET / -> retorna "API de Tarefas no Ar"
 app.get('/', (req, res) => {
     res.status(200).send('API de Tarefas no Ar');
 });
+// GET / -> retorna "API de Tarefas no Ar"
 
-// GET /tarefas -> lista todas as tarefas
-// GET /tarefas?concluida=true -> filtra por status. Resposta: [{ id: ... , titulo: ... , concluida: true }]
 app.get('/tarefas', (req, res) => {
     const { concluida } = req.query;
 
@@ -42,8 +40,14 @@ app.get('/tarefas', (req, res) => {
 
     res.status(200).json(buscaConcluida);
 });
+// GET /tarefas -> lista todas as tarefas 
+// Resposta: [{"id":1,"titulo":"Lavar o carro","concluida":true},
+// {"id":2,"titulo":'Fazer bolo',"concluida":false},
+// {"id":3,"titulo":'Varrer a calçada',"concluida": true}]
 
-// GET /tarefas/2 -> retorna a tarefa com esse id, ou 404 se não existir
+// GET /tarefas?concluida=false -> filtra por status. 
+// Resposta: {"id":2,"titulo":'Fazer bolo',"concluida":false}
+
 app.get('/tarefas/:id', (req, res) => {
     const { id } = req.params;
     const buscaId = tarefas.find( p => p.id === Number(id));
@@ -55,12 +59,35 @@ app.get('/tarefas/:id', (req, res) => {
     res.status(200).json(buscaId);
 });
 
-// POST /tarefas, body: { "titulo": "Estudar Express" } -> cria e mostra a tarefa e retorna 201
-app.post('/tarefas', (req, res) => {
-    if (!req.body.titulo) {
-            return res.status(400).json({error: "O campo título é obrigatório"})
-        };
+// GET /tarefas/2 -> retorna a tarefa com esse id, ou 404 se não existir
+// Resposta: {"id":2,"titulo":'Fazer bolo',"concluida":false},
 
+function autenticacao(req, res, next) {
+    const autorizado = req.headers['authorization'];
+
+    if (!autorizado) {
+        return res.status(401).json({ error: "Não autorizado" });
+    }
+
+    next();
+}
+
+function validacaoBody(req, res, next) {
+    if (!req.body.titulo) {
+        return res.status(400).json({ error: "O campo título é obrigatório" });
+    }
+
+    next();
+}
+
+function logAcao(req, res, next) {
+    console.log(`${new Date().toISOString()} - ${req.method} - ${req.url} - titulo: "${req.body.titulo}"`);
+    next();
+}
+
+// POST /tarefas, body: { "titulo": "Estudar Express" } -> cria a tarefa e retorna 201
+// Resposta: {"id":4,"titulo": "Estudar Express","concluida":false}
+app.post('/tarefas', [autenticacao, validacaoBody, logAcao],(req, res) => {
     const novaTarefa = {
         id: tarefas.length + 1,
         titulo: req.body.titulo, 
