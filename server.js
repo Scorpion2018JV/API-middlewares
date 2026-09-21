@@ -80,14 +80,14 @@ function validacaoBody(req, res, next) {
     next();
 }
 
-function logAcao(req, res, next) {
+function log(req, res, next) {
     console.log(`${new Date().toISOString()} - ${req.method} - ${req.url} - titulo: "${req.body.titulo}"`);
     next();
 }
 
 // POST /tarefas, body: { "titulo": "Estudar Express" } -> cria a tarefa e retorna 201
 // Resposta: {"id":4,"titulo": "Estudar Express","concluida":false}
-app.post('/tarefas', [autenticacao, validacaoBody, logAcao],(req, res) => {
+app.post('/tarefas', [autenticacao, validacaoBody, log],(req, res) => {
     const novaTarefa = {
         id: tarefas.length + 1,
         titulo: req.body.titulo, 
